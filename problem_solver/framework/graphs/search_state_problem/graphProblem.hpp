@@ -1,10 +1,10 @@
 #ifndef GRAPHPROBLEM_HPP
 #define GRAPHPROBLEM_HPP
 
-#include "general/problem_solver.hpp"
-#include "general/state.hpp"
-#include "general/action.hpp"
-#include "../graphProblem/search_state_problem/graphAction.hpp"
+#include "../../general/problem.hpp"
+#include "../../general/state.hpp"
+#include "../../general/action.hpp"
+#include "graphAction.hpp"
 #include <map>
 #include <memory>
 #include <vector>

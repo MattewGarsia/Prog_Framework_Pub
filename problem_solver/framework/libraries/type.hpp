@@ -1,8 +1,8 @@
 #pragma once
 #include <queue>
-#include "general/node.hpp"
-#include "general/state.hpp"
-#include "general/frontier.hpp"
+#include "../general/node.hpp"
+#include "../general/state.hpp"
+#include "../general/frontier.hpp"
 
 template <typename T_Type_Cost, typename T_Type_State>
 class Problem;

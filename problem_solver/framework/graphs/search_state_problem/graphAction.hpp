@@ -1,7 +1,7 @@
 #ifndef GRAPHACTION_HPP
 #define GRAPHACTION_HPP
 
-#include "general/action.hpp"
+#include "../../general/action.hpp"
 #include <string>
 
 class graphAction : public Action<double, Heuristic_State<double>> {

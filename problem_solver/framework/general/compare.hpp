@@ -30,3 +30,12 @@ class Compare_F_Cost {
             return f_a > f_b;
         }
 };
+
+
+class Compare_Quality{
+    public:
+        template<typename T_Quality>
+        bool operator()(const T_Quality& a, const T_Quality& b) const {
+            return a > b;
+        }
+};

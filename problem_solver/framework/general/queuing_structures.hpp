@@ -4,7 +4,7 @@
 #include <stack>
 #include <vector>
 #include "frontier.hpp"
-#include "compare_cost.hpp"
+#include "compare.hpp"
 using namespace std;
 
 //  FIFO (BFS)

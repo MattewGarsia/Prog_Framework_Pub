@@ -1,47 +1,13 @@
 
 #include <iostream>
 #include <string>
-#include <chrono>
-#include <iomanip>
-#include "algorithms.hpp"
-#include "general/problem_solver.hpp"
-#include "../graphProblem/search_state_problem/graphProblem.hpp"
-
+#include "search_state_explorer.hpp"
+#include "../general/problem.hpp"
+#include "../graphs/search_state_problem/graphProblem.hpp"
+#include "../libraries/timing.hpp"
+#include "../libraries/namespace.hpp"
 using namespace std;
-
-struct TimingResult {
-    double avg_ms = 0.0;
-    long long avg_ns = 0;
-    int repetitions = 1;
-};
-
-template <typename Explorer>
-TimingResult measure_time(const graphProblem& problem) {
-    int repetitions = 1;
-    volatile size_t sink = 0;
-
-    while (repetitions <= (1 << 20)) {
-        auto start = chrono::steady_clock::now();
-        for (int i = 0; i < repetitions; ++i) {
-            Explorer probe_explorer;
-            sink += probe_explorer.search_solution(problem).size();
-        }
-        auto end = chrono::steady_clock::now();
-
-        const long long total_ns = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
-        if (total_ns > 0) {
-            TimingResult result;
-            result.repetitions = repetitions;
-            result.avg_ns = total_ns / repetitions;
-            result.avg_ms = static_cast<double>(result.avg_ns) / 1e6;
-            return result;
-        }
-        repetitions *= 2;
-    }
-
-    (void)sink;
-    return {};
-}
+using namespace search_tree_algorithms;
 
 template <typename NodeType>
 void print_solution(
@@ -79,13 +45,9 @@ void run(Explorer& explorer, const string& label, const graphProblem& problem) {
     print_solution(sol, explorer.get_iter(), timing.avg_ms, timing.repetitions);
 }
 
-int main() {
+int test_search_tree_algorithms(){
     graphProblem problem;
-    //problemConfiguration* prob_conf = new problemConfiguration();
-    //prob_conf->hasCycle=true;
-    //problem->configuration= *(prob_conf);
-
-
+    
     #if 1
     dfs<double> dfs_explorer;
     run(dfs_explorer, "DFS Solution:", problem);
@@ -110,6 +72,5 @@ int main() {
     a_star<double> a_star_explorer;
     run(a_star_explorer, "A* Solution:", problem);
     #endif
-
     return 0;
 }

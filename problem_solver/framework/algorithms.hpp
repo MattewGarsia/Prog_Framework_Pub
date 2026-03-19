@@ -143,5 +143,4 @@ class a_star : public SearchStateExplorer_GenericAlgo<T_Type_State_Value, T_Type
         a_star(){
             this->frontier = new Min_F_Cost<T_Type_State_Value, T_Type_State>();
         }
-
 };

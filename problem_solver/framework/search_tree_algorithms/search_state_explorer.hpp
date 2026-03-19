@@ -4,38 +4,20 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "state.hpp"
-#include "node.hpp"
-#include "frontier.hpp"
-#include "type.hpp"
+#include "../general/state.hpp"
+#include "../general/node.hpp"
+#include "../general/frontier.hpp"
+#include "../libraries/type.hpp"
+#include "../general/search_state.hpp"
+#include "../general/problem.hpp"
 
-template <typename T_Type_Cost, typename T_Type_State>
-class Problem {
+template <typename T_Cost,typename T_State, typename T_Queue_Struct>
+class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Cost, T_State>>> {
     public:
-        using node_type = Types::node_type<T_Type_Cost, T_Type_State>;
-        using state_type = T_Type_State;
-        using action_type = Action<T_Type_Cost, T_Type_State>;
-
-        node_type* initial_node = nullptr;
-        vector<node_type*> objective_nodes;
-
-        Problem(node_type* _initial_state, vector<node_type*> _objectives)
-        {
-            initial_node = _initial_state;
-            objective_nodes = _objectives;
-        }
-        
-        virtual vector<action_type*> get_actions(const state_type& state) const = 0;
-        virtual state_type get_result(const state_type& state, const action_type& action) const = 0;
-};
-
-template <typename T_Type_Cost,typename T_Type_State, typename T_Queue_Struct>
-class SearchStateExplorer {
-    public:
-        using state_type = T_Type_State;
-        using node_type = Types::node_type<T_Type_Cost, T_Type_State>;
-        using problem_type = Types::problem_type<T_Type_Cost, T_Type_State>;
-        using frontier_type = Types::frontier_type<T_Type_Cost, T_Type_State, T_Queue_Struct>;
+        using state_type = T_State;
+        using node_type = Types::node_type<T_Cost, T_State>;
+        using problem_type = Types::problem_type<T_Cost, T_State>;
+        using frontier_type = Types::frontier_type<T_Cost, T_State, T_Queue_Struct>;
 
         frontier_type* frontier = nullptr;
         vector<state_type> explored;
@@ -52,7 +34,7 @@ class SearchStateExplorer {
             return false;
         }
 
-        vector<node_type> solution(node_type node) {
+        vector<node_type> build_solution(node_type node) {
             vector<node_type> path;
             while (true){
                 path.push_back(node);
@@ -105,11 +87,10 @@ class SearchStateExplorer {
         }
 };
 
-template <typename T_Type_Cost, typename T_Type_State, typename T_Queue_Struct>
-class SearchStateExplorer_GenericAlgo
-    : public SearchStateExplorer<T_Type_Cost, T_Type_State, T_Queue_Struct> {
+template <typename T_Cost, typename T_State, typename T_Queue_Struct>
+class SearchStateExplorer_GenericAlgo : public SearchStateExplorer<T_Cost, T_State, T_Queue_Struct> {
     public:
-        using base_type = SearchStateExplorer<T_Type_Cost, T_Type_State, T_Queue_Struct>;
+        using base_type = SearchStateExplorer<T_Cost, T_State, T_Queue_Struct>;
         using typename base_type::node_type;
         using typename base_type::problem_type;
         using typename base_type::state_type;
