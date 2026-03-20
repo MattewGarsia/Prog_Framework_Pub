@@ -104,7 +104,7 @@ class SearchStateExplorer_GenericAlgo : public SearchStateExplorer<T_Cost, T_Sta
                 this->explored.push_back(node.current_state);
                 this->print_iteration(node, this->iter, false);
                 if (node.current_state.is_objective()){
-                    return this->solution(node);
+                    return this->build_solution(node);
                 }
                 vector<typename node_type::action_type*> actions = problem.get_actions(node.current_state);
                 for (auto action : actions){

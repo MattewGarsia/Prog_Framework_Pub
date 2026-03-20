@@ -2,73 +2,133 @@
 #include <string>
 #include "search_state_successor.hpp"
 #include "../general/problem.hpp"
-#include "../graphs/search_state_problem/graphProblem.hpp"
-#include "../libraries/timing.hpp"
-#include "../libraries/namespace.hpp"
-using namespace iterative_improvement_algorithms;
+#include "../problems/iterative_improvement_problem/chess_problem.hpp"
+#include "../problems/iterative_improvement_problem/chess_operator.hpp"
+#include "../iterative_improvement_algorithms/hill_climbing.hpp"
+#include "../iterative_improvement_algorithms/steepest.hpp"
+#include "../iterative_improvement_algorithms/local_beam.hpp"
+#include "../iterative_improvement_algorithms/simulating_annealing.hpp"
+#include "../iterative_improvement_algorithms/genetic_algorithm.hpp"
+
+#include <iostream>
+#include <iomanip>
+#include <chrono>
+
 using namespace std;
 
+template<typename F>
+double measureMs(F&& f) {
+    auto t0 = chrono::high_resolution_clock::now();
+    f();
+    return chrono::duration<double, milli>(
+        chrono::high_resolution_clock::now() - t0).count();
+}
 
-int test_iterative_improvement_algorithms(){
+// Ricostruisce un ChessState dal name restituito dagli algoritmi
+// che ritornano string (SA, Local_Beam, Genetic)
+ChessState stateFromName(const string& name, int N) {
+    vector<int> board;
+    stringstream ss(name);
+    string tok;
+    while (getline(ss, tok, ','))
+        if (!tok.empty()) board.push_back(stoi(tok));
+    return ChessState(board);
+}
+
+int main() {
+    const int N = 4;
+    cout << "N-Queens  N=" << N << "\n";
+    cout << string(40, '=') << "\n\n";
+
     #if 1
-    HillClimbingAlgorithm<double> hill_climbing_explorer;
-    run(hill_climbing_explorer, "Hill Climbing Solution:", problem);
+    {
+        ChessProblem prob(N, /*k=*/1, /*seed=*/42);
+        Hill_Climbing<int, ChessState> hc;
+        ChessState sol = ChessState(vector<int>(N, 0));
+        double ms = measureMs([&]{ sol = hc.search_solution(prob); });
+
+        cout << "[Hill Climbing]\n"
+             << "  Conflitti : " << sol.heuristic << "\n"
+             << "  Valida    : " << (sol.heuristic == 0 ? "SI" : "NO") << "\n"
+             << "  Tempo     : " << fixed << setprecision(2) << ms << " ms\n";
+        if (sol.heuristic == 0) sol.print();
+        cout << "\n";
+    }
     #endif
 
+    // ── Steepest Ascent ───────────────────────────────────────
     #if 1
-    Steepest<double> steepest_explorer;
-    run(steepest_explorer, "Steepest Ascent Solution:", problem);
+    {
+        ChessProblem prob(N, 1, 42);
+        Steepest<int, ChessState> st;
+        ChessState sol = ChessState(vector<int>(N, 0));
+        double ms = measureMs([&]{ sol = st.search_solution(prob); });
+
+        cout << "[Steepest Ascent]\n"
+             << "  Conflitti : " << sol.heuristic << "\n"
+             << "  Valida    : " << (sol.heuristic == 0 ? "SI" : "NO") << "\n"
+             << "  Tempo     : " << fixed << setprecision(2) << ms << " ms\n";
+        if (sol.heuristic == 0) sol.print();
+        cout << "\n";
+    }
     #endif
 
+    // ── Simulated Annealing ───────────────────────────────────
     #if 1
-    Local_Beam<double> local_beam_explorer(3);
-    run(local_beam_explorer, "Local Beam Solution:", problem);
+    {
+        ChessProblem prob(N, 1, 42);
+        Simulating_Annealing<int, ChessState> sa;
+        string sol_name;
+        double ms = measureMs([&]{ sol_name = sa.search_solution(prob); });
+        ChessState sol = stateFromName(sol_name, N);
+
+        cout << "[Simulated Annealing]\n"
+             << "  Conflitti : " << sol.heuristic << "\n"
+             << "  Valida    : " << (sol.heuristic == 0 ? "SI" : "NO") << "\n"
+             << "  Tempo     : " << fixed << setprecision(2) << ms << " ms\n";
+        if (sol.heuristic == 0) sol.print();
+        cout << "\n";
+    }
     #endif
 
+    // ── Local Beam ────────────────────────────────────────────
     #if 1
-    Simulated_Annealing<double> simulated_annealing_explorer(1000, 0.95);
-    run(simulated_annealing_explorer, "Simulated Annealing Solution:", problem);
+    {
+        ChessProblem prob(N, /*k=*/5, 42);
+        Local_Beam<int, ChessState> lb(5);
+        string sol_name;
+        double ms = measureMs([&]{ sol_name = lb.search_solution(prob); });
+        ChessState sol = stateFromName(sol_name, N);
+
+        cout << "[Local Beam  k=5]\n"
+             << "  Conflitti : " << sol.heuristic << "\n"
+             << "  Valida    : " << (sol.heuristic == 0 ? "SI" : "NO") << "\n"
+             << "  Tempo     : " << fixed << setprecision(2) << ms << " ms\n";
+        if (sol.heuristic == 0) sol.print();
+        cout << "\n";
+    }
     #endif
 
+    // ── Genetic Algorithm ─────────────────────────────────────
     #if 1
-    GenerativeAlgorithm<double> genetic_explorer(1000, 0.1);
-    run(genetic_explorer, "Genetic Algorithm Solution:", problem);
+    {
+        ChessProblem prob(N, /*k=*/10, 42);
+        ChessOperator chess_operator;
+        Genetic_Algorithm<int, ChessState> ga(&chess_operator,
+                                              200,
+                                              0.05,
+                                              10);
+        string sol_name;
+        double ms = measureMs([&]{ sol_name = ga.search_solution(prob); });
+        ChessState sol = stateFromName(sol_name, N);
+
+        cout << "[Genetic Algorithm  pop=10]\n"
+             << "  Conflitti : " << sol.heuristic << "\n"
+             << "  Valida    : " << (sol.heuristic == 0 ? "SI" : "NO") << "\n"
+             << "  Tempo     : " << fixed << setprecision(2) << ms << " ms\n";
+        if (sol.heuristic == 0) sol.print();
+        cout << "\n";
+    }
     #endif
     return 0;
-}
-
-template <typename NodeType>
-void print_solution(
-    const vector<NodeType>& solution,
-    int iter,
-    double elapsed_ms = 0.0,
-    int repetitions = 1) {
-    if (!solution.empty()) {
-        int final_cost = 0;
-        cout << "Solution found! Path: ";
-        for (size_t i = 0; i < solution.size(); i++) {
-            cout << solution[i].current_state.name;
-            if (i + 1 < solution.size()) cout << " -> ";
-        }
-        final_cost = solution[solution.size() - 1].cost;
-        cout << "\nFinal cost: " << final_cost << endl;
-        cout << "Iterations: " << iter << endl;
-        cout << fixed << setprecision(6);
-        cout << "Elapsed time (s): " << (elapsed_ms) << " ms" << endl;
-        if (repetitions > 1) {
-            cout << "(average over " << repetitions << " runs)" << endl;
-        }
-        cout.unsetf(ios::floatfield);
-        cout<<"\n";
-    } else {
-        cout << "No solution found.\n\n";
-    }
-}
-
-template <typename Explorer>
-void run(Explorer& explorer, const string& label, const graphProblem& problem) {
-    auto sol = explorer.search_solution(problem);
-    TimingResult timing = measure_time<Explorer>(problem);
-    cout << label << endl;
-    print_solution(sol, explorer.get_iter(), timing.avg_ms, timing.repetitions);
 }

@@ -34,7 +34,7 @@ class bfs : public SearchStateExplorer<T_Type_State_Value, T_Type_State,
                     if (!this->contain(this->explored, child_state) && !this->frontier->contain(node_type(child_state, nullptr, nullptr))){
                         node_type child_node(child_state, action, new node_type(node));
                         if (child_state.is_objective()){
-                            return this->solution(child_node);
+                            return this->build_solution(child_node);
                         }
                         this->frontier->insert(child_node);
                         this->print_iteration(child_node, this->iter, true);

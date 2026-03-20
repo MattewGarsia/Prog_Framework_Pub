@@ -1,13 +1,17 @@
 
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include "search_state_explorer.hpp"
 #include "../general/problem.hpp"
 #include "../graphs/search_state_problem/graphProblem.hpp"
 #include "../libraries/timing.hpp"
-#include "../libraries/namespace.hpp"
+#include "../search_tree_algorithms/bfs.hpp"
+#include "../search_tree_algorithms/dfs.hpp"
+#include "../search_tree_algorithms/min_cost.hpp"
+#include "../search_tree_algorithms/best_first_greedy.hpp"
+#include "../search_tree_algorithms/a_star.hpp"
 using namespace std;
-using namespace search_tree_algorithms;
 
 template <typename NodeType>
 void print_solution(
@@ -45,7 +49,7 @@ void run(Explorer& explorer, const string& label, const graphProblem& problem) {
     print_solution(sol, explorer.get_iter(), timing.avg_ms, timing.repetitions);
 }
 
-int test_search_tree_algorithms(){
+int main(){
     graphProblem problem;
     
     #if 1

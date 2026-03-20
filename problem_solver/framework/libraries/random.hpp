@@ -1,7 +1,7 @@
 #pragma once
 
 #include <random>
-
+using namespace std;
 class Random {
     public:
         static int random_int(int min, int max) {
