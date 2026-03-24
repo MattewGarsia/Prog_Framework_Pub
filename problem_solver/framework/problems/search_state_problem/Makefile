@@ -11,7 +11,7 @@ $(TARGET): $(SRC)
 	$(GCC) $(GCCFLAGS) -o $@ $<
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) All All
 
 clean:
 	if exist $(TARGET) del /Q $(TARGET)

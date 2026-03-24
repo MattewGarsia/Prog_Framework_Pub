@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-template <typename T_Type_Cost>
+template <typename T_Cost>
 class State{
     public:
         string name;
@@ -18,14 +18,14 @@ class State{
         }
 };
 
-template <typename T_Type_Cost>
-class Heuristic_State : public State<T_Type_Cost>{
+template <typename T_Cost>
+class Heuristic_State : public State<T_Cost>{
     public:
-        T_Type_Cost heuristic = T_Type_Cost();
+        T_Cost heuristic = T_Cost();
 };
 
-template<typename T_Type_Cost>
-ostream& operator<<(ostream& os, const State<T_Type_Cost>& state) {
+template<typename T_Cost>
+ostream& operator<<(ostream& os, const State<T_Cost>& state) {
     os << state.name;
     return os;
 }

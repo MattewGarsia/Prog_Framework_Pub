@@ -3,17 +3,20 @@
 #include "state.hpp"
 using namespace std;
 
-template<typename T_Type_Cost, typename T_Type_State>
+template<typename T_Cost, typename T_State>
 class Action {
     public:
-        using state_type = T_Type_State;
+        using state_type = T_State;
         
         state_type destination_state;
-        T_Type_Cost cost;
+        T_Cost cost;
         
-        Action(state_type dest, T_Type_Cost c) : destination_state(dest), cost(c) {}
+        Action(state_type dest, T_Cost c){
+            destination_state = dest;
+            cost = c;
+        }
         
-        T_Type_Cost getCost() const { 
+        T_Cost getCost() const { 
             return cost; 
         }
 };

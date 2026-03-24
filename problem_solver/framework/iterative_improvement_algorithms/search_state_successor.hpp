@@ -10,7 +10,7 @@ template <typename T_Cost, typename T_State>
 class SearchStateSuccessor : public SearchState<T_Cost, T_State, string> {
     public:
         using state_type = T_State;
-        using node_type = Types::node_type<T_Cost, state_type>;
+        using node_type = General_Node<T_Cost, state_type>;
         using problem_type = typename SearchState<T_Cost, T_State, string>::problem_type;
         vector<state_type> successors;
         int k;

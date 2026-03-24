@@ -10,6 +10,8 @@
 #include "../libraries/type.hpp"
 #include "../general/search_state.hpp"
 #include "../general/problem.hpp"
+#include "problem_state_explorer.hpp"
+using namespace std;
 
 template <typename T_Cost,typename T_State, typename T_Queue_Struct>
 class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Cost, T_State>>> {
@@ -17,11 +19,11 @@ class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Co
         using state_type = T_State;
         using node_type = Types::node_type<T_Cost, T_State>;
         using problem_type = Types::problem_type<T_Cost, T_State>;
+        using explorer_problem_type = ProblemStateExplorer<T_Cost, T_State>;
         using frontier_type = Types::frontier_type<T_Cost, T_State, T_Queue_Struct>;
 
         frontier_type* frontier = nullptr;
         vector<state_type> explored;
-        int iter = 0;
 
         virtual vector<node_type> search_solution(const problem_type &problem) = 0;
 
@@ -50,7 +52,7 @@ class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Co
         string vector_to_string(const vector<state_type>& vec) {
             string result = "";
             for (const state_type& state : vec){
-                result += to_string(state.value) + " ";
+                result += state.name + " ";
             }
             return result;
         }
@@ -60,6 +62,7 @@ class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Co
             #define PRINT_ON 0
 
 
+            //elimino i warning 
             #if !PRINT_ON
             (void)node;
             (void)iter;
@@ -69,9 +72,9 @@ class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Co
             #if PRINT_ON
             string result = "";
             if (is_child){
-                result += "child: "+ to_string(node.current_state.name) + ", cost: " + to_string(node.cost);
+                result += "child: " + node.current_state.name + ", cost: " + to_string(node.cost);
             } else {
-                result += "node: "+ to_string(node.current_state.name) + ", cost: " + to_string(node.cost);
+                result += "node: " + node.current_state.name + ", cost: " + to_string(node.cost);
             }
             result += "| frontier: "+ this->frontier->frontier_to_string();
             result += "| explored: "+ this->vector_to_string(explored);
@@ -80,10 +83,6 @@ class SearchStateExplorer : public SearchState<T_Cost, T_State, vector<Node<T_Co
             result+="\n";
             cout<<result;
             #endif
-        }
-
-        int get_iter() {
-            return this->iter;
         }
 };
 
@@ -96,6 +95,13 @@ class SearchStateExplorer_GenericAlgo : public SearchStateExplorer<T_Cost, T_Sta
         using typename base_type::state_type;
 
         vector<node_type> search_solution(const problem_type &problem) override {
+            //controllo se è un StateExplorerProblem
+            auto explorer_problem = dynamic_cast<const typename base_type::explorer_problem_type*>(&problem);
+            if (!explorer_problem) {
+                cout<<"Error: problem is not of type ProblemStateExplorer."<<endl;
+                return {};
+            }
+
             node_type initial_node(problem.initial_node->current_state, nullptr, nullptr);
             this->frontier->insert(initial_node);
             
@@ -106,9 +112,9 @@ class SearchStateExplorer_GenericAlgo : public SearchStateExplorer<T_Cost, T_Sta
                 if (node.current_state.is_objective()){
                     return this->build_solution(node);
                 }
-                vector<typename node_type::action_type*> actions = problem.get_actions(node.current_state);
+                vector<typename node_type::action_type*> actions = explorer_problem->get_actions(node.current_state);
                 for (auto action : actions){
-                    state_type child_state = problem.get_result(node.current_state, *action);
+                    state_type child_state = problem.get_result(*action);
                     if (!this->contain(this->explored, child_state)){
                         node_type child_node(child_state, action, new node_type(node));
                         if(!this->frontier->contain(child_node)){

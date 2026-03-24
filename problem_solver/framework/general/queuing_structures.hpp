@@ -8,13 +8,11 @@
 using namespace std;
 
 //  FIFO (BFS)
-template <typename T_Type_State_Value, typename T_Type_State>
-class FIFO : public Frontier<T_Type_State_Value, T_Type_State,
-                    queue<Node<T_Type_State_Value, T_Type_State>>> {
+template <typename T_Cost, typename T_State>
+class FIFO : public Frontier<T_Cost, T_State, queue<Node<T_Cost, T_State>>> {
     public:
-        using base_type = Frontier<T_Type_State_Value, T_Type_State,
-                        queue<Node<T_Type_State_Value, T_Type_State>>>;
-        using node_type = Node<T_Type_State_Value, T_Type_State>;
+        using base_type = Frontier<T_Cost, T_State, queue<Node<T_Cost, T_State>>>;
+        using node_type = Node<T_Cost, T_State>;
 
         FIFO() { this->nodes = queue<node_type>(); }
 
@@ -25,90 +23,88 @@ class FIFO : public Frontier<T_Type_State_Value, T_Type_State,
         }
 
         bool contain(const node_type &node) override {
-            queue<node_type> tmp = this->nodes;
-            while (!tmp.empty()) {
-                if (tmp.front().current_state.name == node.current_state.name)
+            queue<node_type> temp_queue = this->nodes;
+            while (!temp_queue.empty()) {
+                if (temp_queue.front().current_state.name == node.current_state.name)
                     return true;
-                tmp.pop();
+                temp_queue.pop();
             }
             return false;
         }
 
         node_type get_node(const node_type &node) override {
-            queue<node_type> tmp = this->nodes;
-            while (!tmp.empty()) {
-                if (tmp.front().current_state.name == node.current_state.name)
-                    return tmp.front();
-                tmp.pop();
+            queue<node_type> temp_queue = this->nodes;
+            while (!temp_queue.empty()) {
+                if (temp_queue.front().current_state.name == node.current_state.name)
+                    return temp_queue.front();
+                temp_queue.pop();
             }
             throw runtime_error("Node not found in frontier");
         }
 
         void substitute_node(const node_type &old_node, const node_type &new_node) override {
-            queue<node_type> tmp;
+            queue<node_type> temp_queue = this->nodes;
             while (!this->nodes.empty()) {
                 node_type n = this->nodes.front();
                 this->nodes.pop();
                 if (n.current_state.name == old_node.current_state.name)
-                    tmp.push(new_node);
+                    temp_queue.push(new_node);
                 else
-                    tmp.push(n);
+                    temp_queue.push(n);
             }
-            this->nodes = tmp;
+            this->nodes = temp_queue;
         }
 
         string frontier_to_string() override {
-            queue<node_type> tmp = this->nodes;
+            queue<node_type> temp_queue = this->nodes;
             string result = "FIFO: [";
-            while (!tmp.empty()) {
-                result += tmp.front().current_state.name + "(c: " + std::to_string(tmp.front().cost) + ")";
-                tmp.pop();
-                if (!tmp.empty()) result += ", ";
+            while (!temp_queue.empty()) {
+                result += temp_queue.front().current_state.name + "(c: " + std::to_string(temp_queue.front().cost) + ")";
+                temp_queue.pop();
+                if (!temp_queue.empty()) result += ", ";
             }
             result += "]";
             return result;
         }
 };
 
-template <typename T_Type_State_Value, typename T_Type_State>
-class LIFO : public Frontier_Generic_Queuing_Structure<T_Type_State_Value, T_Type_State,
-                    stack<Node<T_Type_State_Value, T_Type_State>>> {
+template <typename T_Cost, typename T_State>
+class LIFO : public Frontier_Generic_Queuing_Structure<T_Cost, T_State, stack<Node<T_Cost, T_State>>> {
     public:
-        using base_type = Frontier_Generic_Queuing_Structure<T_Type_State_Value, T_Type_State,
-                        stack<Node<T_Type_State_Value, T_Type_State>>>;
-        using node_type = Node<T_Type_State_Value, T_Type_State>;
+        using base_type = Frontier_Generic_Queuing_Structure<T_Cost, T_State, stack<Node<T_Cost, T_State>>>;
+        using node_type = Node<T_Cost, T_State>;
 
         LIFO() { this->nodes = stack<node_type>(); }
 
         bool contain(const node_type& node) override {
-            stack<node_type> tmp = this->nodes;
-            while (!tmp.empty()) {
-                if (tmp.top().current_state.name == node.current_state.name) {
+            stack<node_type> temp_stack = this->nodes;
+            while (!temp_stack.empty()) {
+                if (temp_stack.top().current_state.name == node.current_state.name) {
                     return true;
                 }
-                tmp.pop();
+                temp_stack.pop();
             }
             return false;
         }
 
         node_type get_node(const node_type& node) override {
-            stack<node_type> tmp = this->nodes;
-            while (!tmp.empty()) {
-                if (tmp.top().current_state.name == node.current_state.name) {
-                    return tmp.top();
+            stack<node_type> temp_stack = this->nodes;
+            while (!temp_stack.empty()) {
+                if (temp_stack.top().current_state.name == node.current_state.name) {
+                    return temp_stack.top();
                 }
-                tmp.pop();
+                temp_stack.pop();
             }
             throw runtime_error("Node not found in frontier");
         }
 
         string frontier_to_string() override {
-            stack<node_type> tmp = this->nodes;
+            stack<node_type> temp_stack = this->nodes;
             string result = "LIFO: [";
-            while (!tmp.empty()) {
-                result += tmp.top().current_state.name + "(c: " + std::to_string(tmp.top().cost) + ")";
-                tmp.pop();
-                if (!tmp.empty()) result += ", ";
+            while (!temp_stack.empty()) {
+                result += temp_stack.top().current_state.name + "(c: " + std::to_string(temp_stack.top().cost) + ")";
+                temp_stack.pop();
+                if (!temp_stack.empty()) result += ", ";
             }
             result += "]";
             return result;
@@ -116,54 +112,45 @@ class LIFO : public Frontier_Generic_Queuing_Structure<T_Type_State_Value, T_Typ
 };
 
 //  Min_G_Cost (costo cammino)
-template <typename T_Type_State_Value, typename T_Type_State>
-class Min_G_Cost : public Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                    priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                    vector<Node<T_Type_State_Value, T_Type_State>>,
+template <typename T_Cost, typename T_State>
+class Min_G_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+                    priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                     Compare_G_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                        priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+                        priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_G_Cost>>;
-        using queue_type = priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using queue_type = priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_G_Cost>;
 
         Min_G_Cost() { this->nodes = queue_type(); }
 };
 
 //  Min_Objective_Cost (euristica h(n))
-template <typename T_Type_State_Value, typename T_Type_State>
-class Min_H_Cost : public Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                    priority_queue<Node<T_Type_State_Value, T_Type_State>, 
-                    vector<Node<T_Type_State_Value, T_Type_State>>, 
+template <typename T_Cost, typename T_State>
+class Min_H_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+                    priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>, 
                     Compare_H_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                        priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+                        priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_H_Cost>>;
-        using queue_type = priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using queue_type = priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>,
                         Compare_H_Cost>;
 
         Min_H_Cost() { this->nodes = queue_type(); }
 };
 
-//  Min_F_Cost (A* -> f(n) = g(n) + h(n))
-template <typename T_Type_State_Value, typename T_Type_State>
-class Min_F_Cost : public Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                priority_queue<Node<T_Type_State_Value, T_Type_State>, 
-                vector<Node<T_Type_State_Value, T_Type_State>>, 
+//  Min_F_Cost (f(n) = g(n) + h(n))
+template <typename T_Cost, typename T_State>
+class Min_F_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+                priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>, 
                 Compare_F_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Type_State_Value, T_Type_State,
-                        priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+                        priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_F_Cost>>;
-        using queue_type = priority_queue<Node<T_Type_State_Value, T_Type_State>,
-                        vector<Node<T_Type_State_Value, T_Type_State>>,
+        using queue_type = priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_F_Cost>;
 
         Min_F_Cost() { this->nodes = queue_type(); }

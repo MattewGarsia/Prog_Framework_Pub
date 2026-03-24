@@ -1,17 +1,15 @@
 #pragma once
 
-#include "../../general/problem.hpp"
+#include "../../iterative_improvement_algorithms/problem_curr_pop.hpp"
 #include "../../general/state.hpp"
 #include "../../general/action.hpp"
 #include "chess_state.hpp"
+#include "../../libraries/random.hpp"
 
 #include <vector>
 #include <string>
-#include <sstream>
-#include <numeric>
-#include <algorithm>
-#include <stdexcept>
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <random>
 #include <chrono>
@@ -26,52 +24,67 @@ public:
     using state_type  = ChessState;
 
     int N;
+    mutable mt19937 rng;
 
-    explicit ChessProblem(int n, int k = 10, unsigned seed = 0)
-        : base_type(new node_type(_makeInitialState(n, seed)), {}, k), N(n)
+    ChessProblem(int n, int k = 10, unsigned seed = 0) : base_type()
     {
+        N = n;
+        this->k = k;
+        this->initial_node = new node_type(makeInitialState(n));
+        rng = mt19937(seed == 0 ? (unsigned)chrono::steady_clock::now().time_since_epoch().count() : seed);
         if (n <= 3) throw invalid_argument("N deve essere > 3");
 
-        mt19937 rng(seed == 0
-            ? (unsigned)chrono::steady_clock::now().time_since_epoch().count()
-            : seed + 1);
         current_population.clear();
-        for (int i = 0; i < k; ++i)
-            current_population.push_back(_makeRandomState(n, rng));
+        for (int i = 0; i < k; i++) current_population.push_back(makeRandomState(n));
     }
 
-    vector<action_type*> get_actions(const state_type& state) const override {
-        vector<action_type*> actions;
-        actions.reserve(N * (N - 1) / 2);
-        for (int r1 = 0; r1 < N - 1; ++r1)
-            for (int r2 = r1 + 1; r2 < N; ++r2) {
-                vector<int> nb = state.board;
-                swap(nb[r1], nb[r2]);
-                actions.push_back(new action_type(ChessState(nb), 1));
-            }
-        return actions;
-    }
-
-    state_type get_result(const state_type&,
-                          const action_type& action) const override {
+    state_type get_result(const action_type& action) const override {
         return action.destination_state;
+    }
+   
+    virtual state_type get_best_neighbor(const state_type& state) const override{
+        state_type best_neighbor = state;
+        for (int col = 0; col < N; col++) {
+            for (int row = 0; row < N; row++) {
+                if (row == state.board[col]) continue; // mossa nulla
+                vector<int> new_board = state.board;
+                new_board[col] = row;
+                state_type neighbor(new_board);
+                if (neighbor.heuristic < state.heuristic) best_neighbor = neighbor;
+            }
+        }
+        return best_neighbor;
     }
 
     void printBoard(const state_type& s) const { s.print(); }
     bool isValid(const state_type& s)    const { return s.heuristic == 0; }
 
-private:
-    static state_type _makeInitialState(int n, unsigned seed) {
-        mt19937 rng(seed == 0
-            ? (unsigned)chrono::steady_clock::now().time_since_epoch().count()
-            : seed);
-        return _makeRandomState(n, rng);
+    state_type get_random_neighbor(const state_type& state) const override {
+        int col = random_int(0, N - 1);
+        int row;
+        
+        do
+        {
+            row = random_int(0, N - 1);
+        }while (row == state.board[col]); // cerco mossa non nulla
+        
+        vector<int> new_board = state.board;
+        new_board[col] = row;
+        return state_type(new_board);
     }
 
-    static state_type _makeRandomState(int n, mt19937& rng) {
-        vector<int> b(n);
-        iota(b.begin(), b.end(), 0);
-        shuffle(b.begin(), b.end(), rng);
-        return state_type(b);
+    state_type get_random_state() const override {
+        return makeRandomState(N);
+    }
+
+    state_type makeInitialState(int n) const {
+        return makeRandomState(n);
+    }
+
+    state_type makeRandomState(int n)const {
+        vector<int> new_board(n);
+        iota(new_board.begin(), new_board.end(), 0); //riempio la board con 0,...,n-1
+        shuffle(new_board.begin(), new_board.end(), this->rng); //shuffle della board
+        return state_type(new_board);
     }
 };

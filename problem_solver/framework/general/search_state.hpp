@@ -12,6 +12,7 @@
 template <typename T_Cost, typename T_State, typename T_Solution>
 class SearchState {
     public:
+        int iter = 0;
         using state_type = T_State;
         using node_type = Types::node_type<T_Cost, T_State>;
         using problem_type = Types::problem_type<T_Cost, T_State>;
@@ -24,32 +25,6 @@ class SearchState {
                 result += to_string(state.value) + " ";
             }
             return result;
-        }
-
-        void print_iteration(node_type node, int iter, bool is_child = false){
-            #define PRINT_ON 0
-
-
-            #if !PRINT_ON
-            (void)node;
-            (void)iter;
-            (void)is_child;
-            #endif
-
-            #if PRINT_ON
-            string result = "";
-            if (is_child){
-                result += "child: "+ to_string(node.current_state.name) + ", cost: " + to_string(node.cost);
-            } else {
-                result += "node: "+ to_string(node.current_state.name) + ", cost: " + to_string(node.cost);
-            }
-            result += "| frontier: "+ this->frontier->frontier_to_string();
-            result += "| explored: "+ this->vector_to_string(explored);
-            result += "| iteration: " + to_string(iter);
-
-            result+="\n";
-            cout<<result;
-            #endif
         }
 
         int get_iter() {

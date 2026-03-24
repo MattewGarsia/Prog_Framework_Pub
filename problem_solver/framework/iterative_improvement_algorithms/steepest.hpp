@@ -2,32 +2,40 @@
 #include "../general/search_state.hpp"
 #include "../libraries/type.hpp"
 #include "../libraries/random.hpp"
+#include "../iterative_improvement_algorithms/problem_curr_pop.hpp"
+#include <stdexcept>
 using namespace std;
 
 template <typename T_Cost, typename T_State>
 class Steepest : public SearchState<T_Cost, T_State, T_State>{
     public:
         using state_type = T_State;
-        using node_type = Types::node_type<T_Cost, state_type>;
-        using problem_type = Types::problem_type<T_Cost, state_type>;
+        using node_type = General_Node<T_Cost, state_type>;
+        using problem_type = Problem_popul<T_Cost, state_type>;
         Steepest() : SearchState<T_Cost, T_State, T_State>(){
             
         }
 
-        T_State search_solution(const problem_type& problem) override {
-            node_type current_node(problem.initial_node->current_state, nullptr, nullptr);
+        T_State search_solution(const typename SearchState<T_Cost, T_State, T_State>::problem_type& generic_problem) override {
+            auto problem = dynamic_cast<const problem_type*>(&generic_problem);
+            if (!problem) {
+                throw invalid_argument("Steepest richiede un Problem_popul compatibile");
+            }
+
+            node_type current_node(problem->initial_node->current_state);
             while (true) {
-                vector<typename node_type::action_type*> actions = problem.get_actions(current_node.current_state);
-                if (actions.empty()) {
-                    return current_node.current_state;
+                state_type neighbor = problem->get_best_neighbor(current_node.current_state);
+                if (neighbor.heuristic >= current_node.current_state.heuristic) {
+                    //return current_node.current_state;
+                    current_node = node_type(problem->get_random_state(), nullptr, current_node.cost, current_node.depth + 1);
+                }
+                else{
+                    current_node = node_type(neighbor, nullptr, current_node.cost, current_node.depth + 1);
                 }
 
-                int i = random_int(0, static_cast<int>(actions.size()) - 1);
-                state_type neighbor = problem.get_result(current_node.current_state, *actions[i]);
-                if (neighbor.heuristic >= current_node.current_state.heuristic) {
+                if (current_node.current_state.heuristic == 0) {
                     return current_node.current_state;
                 }
-                current_node = node_type(neighbor, actions[i], new node_type(current_node));
             }
         }
 };

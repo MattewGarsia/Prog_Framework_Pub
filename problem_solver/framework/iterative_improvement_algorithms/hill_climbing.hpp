@@ -2,36 +2,46 @@
 #include "../general/search_state.hpp"
 #include "../libraries/type.hpp"
 #include "../libraries/random.hpp"
+#include "../iterative_improvement_algorithms/problem_curr_pop.hpp"
 using namespace std;
+
+#define MAX_NUMBER_OF_ATTEMPTS 100
 
 template <typename T_Cost, typename T_State>
 class Hill_Climbing : public SearchState<T_Cost, T_State, T_State>{
     public:
         using state_type = T_State;
-        using node_type = Types::node_type<T_Cost, state_type>;
-        using problem_type = Types::problem_type<T_Cost, state_type>;
+        using node_type = General_Node<T_Cost, state_type>;
+        using problem_type = Problem_popul<T_Cost, state_type>;
         bool move_found = false;
         Hill_Climbing() : SearchState<T_Cost, state_type, state_type>(){
             
         }
 
-        T_State search_solution(const problem_type& problem) override {
-            node_type current_node(problem.initial_node->current_state, nullptr, nullptr);
+        T_State search_solution(const typename SearchState<T_Cost, state_type, state_type>::problem_type& generic_problem) override {
+            auto problem = dynamic_cast<const problem_type*>(&generic_problem);
+            if (!problem) {
+                throw invalid_argument("Hill_Climbing richiede un Problem_popul compatibile");
+            }
+
+            node_type current_node(problem->initial_node->current_state);
             while (true) {
                 move_found = false;
-                vector<typename node_type::action_type*> actions = problem.get_actions(current_node.current_state);
-                while (!move_found && !actions.empty()) {
-                    int i = random_int(0, static_cast<int>(actions.size()) - 1);
-                    state_type next_state = problem.get_result(current_node.current_state, *actions[i]);
-                    actions.erase(actions.begin() + i); // Rimuove l'azione già considerata
+                int attempts = 0;
+                while (!move_found && attempts < MAX_NUMBER_OF_ATTEMPTS) {
+                    state_type next_state = problem->get_random_neighbor(current_node.current_state);
                     //cout<<"Current state: "<<current_node.current_state.name<<", heuristic: "<<current_node.current_state.heuristic<<endl;
                     //cout<<"Next state: "<<next_state.name<<", heuristic: "<<next_state.heuristic<<endl;
                     if (next_state.heuristic < current_node.current_state.heuristic) {
-                        current_node = node_type(next_state, actions[i], new node_type(current_node));
+                        current_node = node_type(next_state, nullptr, current_node.cost, current_node.depth + 1);
                         move_found = true;
                     }
+                    attempts++;
                 }
                 if (!move_found) {
+                    current_node = node_type(problem->get_random_state(), nullptr, current_node.cost, current_node.depth + 1);
+                }
+                if (current_node.current_state.heuristic == 0) {
                     return current_node.current_state;
                 }
             }
