@@ -2,6 +2,7 @@
 #include "search_state_successor.hpp"
 #include "../libraries/random.hpp"
 #include "../iterative_improvement_algorithms/problem_curr_pop.hpp"
+#include "../general/general_node.hpp"
 #include <cmath>
 using namespace std;
 
@@ -15,7 +16,7 @@ class Simulating_Annealing : public SearchStateSuccessor<T_Cost, T_State>{
         using base_type = SearchStateSuccessor<T_Cost, T_State>;
         using state_type = typename base_type::state_type;
         using node_type = General_Node<T_Cost, state_type>;
-        using problem_type = Problem_popul<T_Cost, state_type>;
+        using problem_type = typename base_type::problem_type;
 
         Simulating_Annealing(int _k = 1) : SearchStateSuccessor<T_Cost, T_State>(_k) {}
 

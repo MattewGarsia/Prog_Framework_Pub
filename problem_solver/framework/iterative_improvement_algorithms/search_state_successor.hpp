@@ -1,20 +1,21 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "../general/search_state.hpp"
+#include "local_search.hpp"
 #include "../general/problem.hpp"
+#include "../general/general_node.hpp"
 #include "../libraries/type.hpp"
 using namespace std;
 
 template <typename T_Cost, typename T_State>
-class SearchStateSuccessor : public SearchState<T_Cost, T_State, string> {
+class SearchStateSuccessor : public Local_Search<T_Cost, T_State, string> {
     public:
         using state_type = T_State;
         using node_type = General_Node<T_Cost, state_type>;
-        using problem_type = typename SearchState<T_Cost, T_State, string>::problem_type;
+        using problem_type = typename Local_Search<T_Cost, T_State, string>::problem_type;
         vector<state_type> successors;
         int k;
-        SearchStateSuccessor(int _k) : SearchState<T_Cost, T_State, string>(){
+        SearchStateSuccessor(int _k) : Local_Search<T_Cost, T_State, string>(){
             this->k = _k;
         }
 

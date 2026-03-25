@@ -11,7 +11,6 @@ class Problem_popul : public Problem<T_Cost, T_State>{
         vector<state_type> current_population;
         int k;
 
-        //Problem_popul() : Problem<T_Cost, T_State> (){}
         Problem_popul() = default;
 
         Problem_popul(node_type* _initial_node, vector<node_type*> _objectives, int _k) : Problem<T_Cost, T_State>(_initial_node, _objectives), k(_k) {

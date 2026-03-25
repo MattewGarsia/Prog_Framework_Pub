@@ -51,8 +51,7 @@ class Genetic_Algorithm : public SearchStateSuccessor<T_Cost, T_State> {
         }
     
         string search_solution(const problem_type& problem) override {
-            const auto& pop_problem = static_cast<const Problem_popul<T_Cost, state_type>&>(problem);
-            vector<state_type> population = pop_problem.current_population; 
+            vector<state_type> population = problem.current_population;
             int t = 0;
             while (true) {                                          
                 state_type best = best_in(population);

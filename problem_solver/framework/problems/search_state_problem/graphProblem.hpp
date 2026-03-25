@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../../search_tree_algorithms/problem_state_explorer.hpp"
-#include "../../general/state.hpp"
+#include "../../general/heuristic_state.hpp"
+#include "../../general/node.hpp"
 #include "../../general/action.hpp"
 #include "graphAction.hpp"
 #include <map>

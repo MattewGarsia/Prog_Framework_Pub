@@ -1,5 +1,5 @@
 #pragma once
-#include "../general/search_state.hpp"
+#include "local_search.hpp"
 #include "../libraries/type.hpp"
 #include "../libraries/random.hpp"
 #include "../iterative_improvement_algorithms/problem_curr_pop.hpp"
@@ -8,17 +8,15 @@ using namespace std;
 #define MAX_NUMBER_OF_ATTEMPTS 100
 
 template <typename T_Cost, typename T_State>
-class Hill_Climbing : public SearchState<T_Cost, T_State, T_State>{
+class Hill_Climbing : public Local_Search<T_Cost, T_State, T_State>{
     public:
         using state_type = T_State;
         using node_type = General_Node<T_Cost, state_type>;
-        using problem_type = Problem_popul<T_Cost, state_type>;
+        using problem_type = typename Local_Search<T_Cost, state_type, state_type>::problem_type;
         bool move_found = false;
-        Hill_Climbing() : SearchState<T_Cost, state_type, state_type>(){
-            
-        }
+        Hill_Climbing() : Local_Search<T_Cost, state_type, state_type>(){}
 
-        T_State search_solution(const typename SearchState<T_Cost, state_type, state_type>::problem_type& generic_problem) override {
+        T_State search_solution(const problem_type& generic_problem) override {
             auto problem = dynamic_cast<const problem_type*>(&generic_problem);
             if (!problem) {
                 throw invalid_argument("Hill_Climbing richiede un Problem_popul compatibile");

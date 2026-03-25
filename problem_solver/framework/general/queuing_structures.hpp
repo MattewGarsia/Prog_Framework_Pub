@@ -4,6 +4,7 @@
 #include <stack>
 #include <vector>
 #include "frontier.hpp"
+#include "frontier_generic_queuing_structure.hpp"
 #include "compare.hpp"
 using namespace std;
 
@@ -75,7 +76,7 @@ class LIFO : public Frontier_Generic_Queuing_Structure<T_Cost, T_State, stack<No
         using node_type = Node<T_Cost, T_State>;
 
         LIFO() { this->nodes = stack<node_type>(); }
-
+        /*
         bool contain(const node_type& node) override {
             stack<node_type> temp_stack = this->nodes;
             while (!temp_stack.empty()) {
@@ -109,15 +110,16 @@ class LIFO : public Frontier_Generic_Queuing_Structure<T_Cost, T_State, stack<No
             result += "]";
             return result;
         }
+        */
 };
 
 //  Min_G_Cost (costo cammino)
 template <typename T_Cost, typename T_State>
-class Min_G_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+class Min_G_Cost : public Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                     priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                     Compare_G_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+        using base_type = Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                         priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_G_Cost>>;
         using queue_type = priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
@@ -128,11 +130,11 @@ class Min_G_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
 
 //  Min_Objective_Cost (euristica h(n))
 template <typename T_Cost, typename T_State>
-class Min_H_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+class Min_H_Cost : public Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                     priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>, 
                     Compare_H_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+        using base_type = Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                         priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_H_Cost>>;
         using queue_type = priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>,
@@ -143,11 +145,11 @@ class Min_H_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
 
 //  Min_F_Cost (f(n) = g(n) + h(n))
 template <typename T_Cost, typename T_State>
-class Min_F_Cost : public Frontier_Priority_Queue<T_Cost, T_State,
+class Min_F_Cost : public Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                 priority_queue<Node<T_Cost, T_State>, vector<Node<T_Cost, T_State>>, 
                 Compare_F_Cost>> {
     public:
-        using base_type = Frontier_Priority_Queue<T_Cost, T_State,
+        using base_type = Frontier_Generic_Queuing_Structure<T_Cost, T_State,
                         priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,
                         Compare_F_Cost>>;
         using queue_type = priority_queue<Node<T_Cost, T_State>,vector<Node<T_Cost, T_State>>,

@@ -8,6 +8,7 @@
 #include "../../libraries/timing.hpp"
 #include "../../search_tree_algorithms/search_state_explorer.hpp"
 #include "../../search_tree_algorithms/bfs.hpp"
+#include "../../search_tree_algorithms/bfs_ott.hpp"
 #include "../../search_tree_algorithms/dfs.hpp"
 #include "../../search_tree_algorithms/min_cost.hpp"
 #include "../../search_tree_algorithms/best_first_greedy.hpp"
@@ -50,7 +51,13 @@ void run(const string& expl_name, const Problem& problem) {
         TimingResult timing = measure_time<dfs<double>>(problem);
         cout << expl_name << endl;
         print_solution(sol, explorer.get_iter(), timing.avg_ms, timing.repetitions);
-    } else if (expl_name == "bfs") {
+    } else if (expl_name == "bfs_ott") {
+        bfs_ott<double> explorer;
+        auto sol = explorer.search_solution(problem);
+        TimingResult timing = measure_time<bfs_ott<double>>(problem);
+        cout << expl_name << endl;
+        print_solution(sol, explorer.get_iter(), timing.avg_ms, timing.repetitions);
+    }else if(expl_name == "bfs") {
         bfs<double> explorer;
         auto sol = explorer.search_solution(problem);
         TimingResult timing = measure_time<bfs<double>>(problem);
@@ -77,6 +84,7 @@ void run(const string& expl_name, const Problem& problem) {
     }else if (expl_name == "All") {
         cout << "Running all explorers...\n\n";
         run("dfs", problem);
+        run("bfs_ott", problem);
         run("bfs", problem);
         run("MinCost", problem);
         run("Greedy", problem);

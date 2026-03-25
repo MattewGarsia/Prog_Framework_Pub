@@ -18,12 +18,6 @@ class State{
         }
 };
 
-template <typename T_Cost>
-class Heuristic_State : public State<T_Cost>{
-    public:
-        T_Cost heuristic = T_Cost();
-};
-
 template<typename T_Cost>
 ostream& operator<<(ostream& os, const State<T_Cost>& state) {
     os << state.name;

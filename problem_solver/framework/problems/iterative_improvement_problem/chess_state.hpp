@@ -1,5 +1,5 @@
 #pragma once
-#include "../../general/state.hpp"
+#include "../../general/heuristic_state.hpp"
 
 #include <string>
 #include <sstream>
