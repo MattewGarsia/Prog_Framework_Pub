@@ -92,22 +92,6 @@ int main(int argc, char* argv[]) {
     cout << string(40, '=') << "\n\n";
 
     run(algorithm_name, prob, N);
-    
-
-    #if 0
-    {
-        ChessProblem prob(N, /*k=*/10, 42);
-        ChessOperator chess_operator;
-        Genetic_Algorithm<int, ChessState> ga(&chess_operator,
-                                              200,
-                                              0.05,
-                                              10);
-        string sol_name;
-        double ms = measureMs([&]{ sol_name = ga.search_solution(prob); });
-        ChessState sol = stateFromName(sol_name, N);
-        print_sol(sol, "Genetic Algorithm", ms);
-    }
-    #endif
 
     return 0;
 }
